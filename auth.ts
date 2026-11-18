@@ -6,6 +6,7 @@ import { users } from "@/db/schema";
 import { verifyPassword } from "@/server/passwords";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  secret: process.env.AUTH_SECRET,
   providers: [Credentials({ credentials: { email: {}, password: {} }, authorize: async credentials => {
     if (typeof credentials.email !== "string" || typeof credentials.password !== "string") return null;
     const user = await db.query.users.findFirst({ where: eq(users.email, credentials.email) });

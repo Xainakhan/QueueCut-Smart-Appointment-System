@@ -9,7 +9,7 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:integration": "set NODE_ENV=test&& vitest run src/server/booking/operations.integration.test.ts",
+    "test:integration": "set NODE_ENV=test&& set RUN_INTEGRATION_TESTS=true&& vitest run src/server/booking/operations.integration.test.ts",
     "test:watch": "vitest",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
