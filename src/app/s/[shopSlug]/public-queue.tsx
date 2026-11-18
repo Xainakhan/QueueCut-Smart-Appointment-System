@@ -1,0 +1,4 @@
+"use client";
+import {useEffect,useState}from"react";
+type Summary={nowServing:string[];remainingSlots:number;nextFree:string[]};
+export default function PublicQueue({shopId}:{shopId:string}){const [data,setData]=useState<Summary>();useEffect(()=>{const load=()=>fetch(`/api/shops/${shopId}/public-queue`).then(r=>r.json()).then(setData).catch(()=>undefined);load();const e=new EventSource(`/api/shops/${shopId}/events`);e.addEventListener("queue-changed",load);const timer=setInterval(load,30000);return()=>{e.close();clearInterval(timer)}},[shopId]);return <section className="card"><h2>Now serving</h2><p>{data?.nowServing.length?data.nowServing.join(", "):"No ticket in progress"}</p><h2>Remaining slots today</h2><p>{data?.remainingSlots??"…"} available{data?.nextFree.length?` · next: ${data.nextFree.map(x=>new Date(x).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})).join(", ")}`:""}</p></section>}

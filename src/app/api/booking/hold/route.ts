@@ -1,0 +1,1 @@
+import { NextRequest,NextResponse } from "next/server";import { holdSlot,BookingError } from "@/server/booking";export async function POST(r:NextRequest){try{return NextResponse.json(await holdSlot(await r.json()))}catch(e){return NextResponse.json({error:e instanceof BookingError?e.code:"invalid_request"},{status:e instanceof BookingError&&e.code==="slot_taken"?409:400})}}
