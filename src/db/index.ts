@@ -7,5 +7,6 @@ if(process.env.NODE_ENV==="test"||!process.env.DATABASE_URL||process.env.DATABAS
 const configuredUrl=process.env.NODE_ENV === "test" ? process.env.DATABASE_URL_TEST : process.env.DATABASE_URL;
 const connectionString = !configuredUrl||configuredUrl.includes("HOST") ? process.env.DATABASE_URL_TEST : configuredUrl;
 if (!connectionString && process.env.NODE_ENV === "production") throw new Error("DATABASE_URL is required");
-const pool = new Pool({ connectionString: connectionString ?? "postgresql://invalid" });
-export const db = drizzle({ client: pool, schema });
+/** The one process-wide pool is shared by the app and integration tests. */
+export const dbPool = new Pool({ connectionString: connectionString ?? "postgresql://invalid", max: process.env.NODE_ENV === "test" ? 5 : undefined });
+export const db = drizzle({ client: dbPool, schema });

@@ -1,0 +1,2 @@
+import { NextRequest,NextResponse } from "next/server";import { sendOtp,verifyOtp,signVerification } from "@/server/otp";
+export async function POST(r:NextRequest){try{const b=await r.json();if(b.code){const customer=await verifyOtp(b.phone,b.code);return NextResponse.json({verificationToken:signVerification(customer.id)})}return NextResponse.json(await sendOtp(b.phone))}catch{return NextResponse.json({error:"invalid_otp"},{status:400})}}

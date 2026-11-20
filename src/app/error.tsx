@@ -1,0 +1,2 @@
+"use client"; import {useEffect} from "react"; import {AppShell} from "./ui";
+export default function Error({reset}:{error:Error;reset:()=>void}){useEffect(()=>{},[]);return <AppShell title="Something went wrong"><main id="main" className="portal centered"><h1>Something went wrong</h1><p>Please check your connection and try again.</p><button className="button" onClick={reset}>Try again</button></main></AppShell>}
