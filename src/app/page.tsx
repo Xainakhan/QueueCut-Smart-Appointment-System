@@ -2,6 +2,6 @@
 import { db } from "@/db";
 export const dynamic = "force-dynamic";
 export default async function Home() {
-  const shop = await db.query.shops.findFirst();
-  redirect(shop ? `/s/${shop.slug}` : "/login");
+  const shop = await db.query.shops.findFirst({ where: (shops, operators) => operators.eq(shops.slug, "queuecut-studio") }) ?? await db.query.shops.findFirst();
+  redirect(shop ? `/${shop.slug}` : "/login");
 }
