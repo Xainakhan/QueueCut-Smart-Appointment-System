@@ -1,13 +1,11 @@
-import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { db } from "@/db";
-import { shops } from "@/db/schema";
+import { getShopBySlug } from "@/server/shop";
 
 export async function requireShopAdmin(shopSlug: string) {
   const session = await auth();
   if (!session?.user) redirect("/login");
-  const shop = await db.query.shops.findFirst({ where: eq(shops.slug, shopSlug) });
+  const shop = await getShopBySlug(shopSlug);
   if (!shop || shop.id !== session.user.shopId) redirect("/login?error=access");
   return { shop, user: session.user };
 }
