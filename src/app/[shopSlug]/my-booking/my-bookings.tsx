@@ -17,6 +17,6 @@ export default function MyBookings({shopSlug,timeZone}:{shopSlug:string;timeZone
     <p>Enter the phone number used when booking to see your appointments.</p>
     <div className="side-form"><label>Phone number<input type="tel" value={phone} onChange={event=>setPhone(event.target.value)} placeholder="+923001234567" autoComplete="tel"/></label><button className="button" type="button" disabled={loading||phone.trim().length<8} onClick={findBookings}>{loading?"Finding…":"Find my bookings"}</button></div>
     {bookings?.length===0&&<p className="hint">No appointments were found for that phone number.</p>}
-    {bookings?.map(booking=><article className="customer-info-card" key={booking.ticketToken}><p className="customer-eyebrow">{booking.status.replace("_"," ")}</p><h3>{booking.services.join(", ")||"Appointment"}</h3><p>{new Intl.DateTimeFormat("en-PK",{dateStyle:"medium",timeStyle:"short",timeZone}).format(new Date(booking.startAt))}</p><a className="button" href={`/t/${booking.ticketToken}`}>Open ticket {booking.ticketNumber}</a></article>)}
+    {bookings?.map(booking=><article className="customer-info-card" key={booking.ticketToken}><p className="customer-eyebrow">{booking.status.replace("_"," ")}</p><h3>{booking.services.join(", ")||"Appointment"}</h3><p>{new Intl.DateTimeFormat("en-PK",{dateStyle:"medium",hour:"numeric",minute:"2-digit",hour12:true,timeZone}).format(new Date(booking.startAt))}</p><a className="button" href={`/t/${booking.ticketToken}`}>Open ticket {booking.ticketNumber}</a></article>)}
   </section>;
 }
