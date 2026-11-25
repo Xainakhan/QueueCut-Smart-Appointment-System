@@ -1,9 +1,10 @@
 "use client";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 type Booking = { id: string; staffId: string; ticketNumber: string; startAt: Date; endAt: Date; status: string; actualStartAt: Date | null; name: string; services: string[] };
 export default function QueueDashboard({ shopId, staff, bookings, owner }: { shopId: string; staff: { id: string; name: string }[]; bookings: Booking[]; owner: boolean }) {
-  const [selected, setSelected] = useState(staff[0]?.id ?? ""); const [message, setMessage] = useState(""); const [pending, setPending] = useState<string | null>(null); const receivedInitialEvent=useRef(false);
-  useEffect(() => { receivedInitialEvent.current=false; const events = new EventSource(`/api/shops/${shopId}/events`); events.addEventListener("queue-changed", () => {if(!receivedInitialEvent.current){receivedInitialEvent.current=true;return}location.reload()}); const refresh = setInterval(() => location.reload(), 60_000); return () => { events.close(); clearInterval(refresh); }; }, [shopId]);
+  const [selected, setSelected] = useState(staff[0]?.id ?? ""); const [message, setMessage] = useState(""); const [pending, setPending] = useState<string | null>(null);
+  // Polling is deliberate: Vercel functions do not share in-memory event listeners.
+  useEffect(() => { const refresh = setInterval(() => location.reload(), 20_000); return () => clearInterval(refresh); }, [shopId]);
   const queue = useMemo(() => bookings.filter(item => item.staffId === selected).sort((a, b) => +new Date(a.startAt) - +new Date(b.startAt)), [bookings, selected]);
   const act = async (action: "start" | "finish" | "no_show", bookingId: string) => { setPending(bookingId); setMessage(""); const response = await fetch("/api/queue", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action, bookingId }) }); setPending(null); if (!response.ok) { setMessage("That update could not be completed. Refresh and try again."); return; } setMessage(action === "start" ? "Appointment started." : action === "finish" ? "Appointment finished." : "Marked as no-show."); location.reload(); };
   const selectedStaff = staff.find(member => member.id === selected)?.name ?? "Team member";

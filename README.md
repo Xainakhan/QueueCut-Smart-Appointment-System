@@ -30,7 +30,9 @@ Copy `.env.test.example` to `.env.test` and set `DATABASE_URL_TEST` to a separat
 
 ## Deploying a pilot (Vercel + Neon)
 
-Add `DATABASE_URL`, `DATABASE_URL_UNPOOLED`, `AUTH_SECRET`, `AUTH_URL`, `SEED_OWNER_EMAIL`, `SEED_OWNER_PASSWORD`, `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, and `VAPID_SUBJECT` to Vercel. Configure the Inngest app with the same production URL and run `npm run db:migrate` against `DATABASE_URL_UNPOOLED` before the first deployment. Never use the test database for a pilot.
+Vercel works well for this application when paired with Neon Postgres. Import the GitHub repository into Vercel; it detects Next.js automatically. Add `DATABASE_URL` (the Neon pooled connection string), `DATABASE_URL_UNPOOLED` (the direct connection string), and a new random `AUTH_SECRET` to Production, Preview, and Development as appropriate. Add the seed and VAPID variables only when those features are in use. `AUTH_URL` is optional on Vercel and should be the canonical production URL if set.
+
+Before the first deployment, run `npm run db:migrate` from a trusted machine with `DATABASE_URL_UNPOOLED` set to the production database. Run it again for every migration. Never use the test database for a pilot. Queue pages use short polling intervals rather than process-local server events, which keeps updates reliable across Vercel's independent function instances.
 
 Pilot checklist: create the shop and its public slug; add services and staff; set each person’s hours and breaks; print or share the public booking URL; make one complete booking; start and finish it from the staff queue; verify the ticket link receives the queue update.
 
