@@ -1,8 +1,26 @@
 "use client";
+
 import { useEffect, useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { FiCalendar, FiClock, FiHome, FiInfo, FiMenu, FiScissors, FiUsers, FiX } from "react-icons/fi";
+
 type Props = { children: ReactNode; shop: { id: string; name: string; slug: string; timeZone: string } };
 const navigation = [{ label: "Home", href: "", icon: <FiHome /> }, { label: "Book", href: "/book", icon: <FiCalendar /> }, { label: "Live queue", href: "/queue", icon: <FiClock /> }, { label: "Services", href: "/services", icon: <FiScissors /> }, { label: "Team", href: "/team", icon: <FiUsers /> }, { label: "My booking", href: "/my-booking", icon: <FiCalendar /> }, { label: "About", href: "/about", icon: <FiInfo /> }];
-export function CustomerShell({ children, shop }: Props) { const [open, setOpen] = useState(false); const [status, setStatus] = useState("Loading live status"); const path = usePathname(); const base = `/${shop.slug}`; useEffect(() => { const load = () => fetch(`/api/shops/${shop.id}/public-queue`).then(response => response.json()).then(data => setStatus(data.nowServing?.length ? `Now serving #${data.nowServing[0]}` : data.nextFree?.[0] ? "Slots available today" : "Fully booked today")).catch(() => setStatus("Live updates unavailable")); load(); const events = new EventSource(`/api/shops/${shop.id}/events`); events.addEventListener("queue-changed", load); return () => events.close(); }, [shop.id]); const links = navigation.map(item => ({ ...item, full: `${base}${item.href}` })); return <div className="customer-shell"><header className="customer-mobile-header"><button type="button" className="icon-button" aria-label="Open navigation" onClick={() => setOpen(true)}><FiMenu /></button><Link href={base}>{shop.name}</Link><span className="customer-live-chip">{status}</span></header><aside className={`customer-sidebar ${open ? "is-open" : ""}`} aria-label="Customer navigation"><div className="customer-sidebar__head"><Link href={base} className="customer-brand"><span>Q</span>{shop.name}</Link><button type="button" className="icon-button customer-close" aria-label="Close navigation" onClick={() => setOpen(false)}><FiX /></button></div><p className="customer-live-chip" aria-live="polite">{status}</p><nav><ul>{links.map(item => <li key={item.label}><Link href={item.full} className={path === item.full ? "is-active" : ""} onClick={() => setOpen(false)}><span>{item.icon}</span>{item.label}</Link></li>)}</ul></nav><Link href={`${base}/book`} className="button customer-book-button">Book now</Link></aside><main className="customer-main">{children}</main><nav className="customer-tabs" aria-label="Customer navigation">{links.slice(0, 3).concat(links[5]).map(item => <Link key={item.label} href={item.full} className={path === item.full ? "is-active" : ""}><span>{item.icon}</span>{item.label}</Link>)}</nav></div>; }
+
+export function CustomerShell({ children, shop }: Props) {
+  const [open, setOpen] = useState(false);
+  const [status, setStatus] = useState("Loading live status");
+  const path = usePathname();
+  const base = `/${shop.slug}`;
+
+  useEffect(() => {
+    const load = () => fetch(`/api/shops/${shop.id}/public-queue`).then(response => response.json()).then(data => setStatus(data.nowServing?.length ? `Now serving #${data.nowServing[0]}` : data.nextFree?.[0] ? "Slots available today" : "Fully booked today")).catch(() => setStatus("Live updates unavailable"));
+    load();
+    const timer = setInterval(load, 15_000);
+    return () => clearInterval(timer);
+  }, [shop.id]);
+
+  const links = navigation.map(item => ({ ...item, full: `${base}${item.href}` }));
+  return <div className="customer-shell"><header className="customer-mobile-header"><button type="button" className="icon-button" aria-label="Open navigation" onClick={() => setOpen(true)}><FiMenu /></button><Link href={base}>{shop.name}</Link><span className="customer-live-chip">{status}</span></header><aside className={`customer-sidebar ${open ? "is-open" : ""}`} aria-label="Customer navigation"><div className="customer-sidebar__head"><Link href={base} className="customer-brand"><span>Q</span>{shop.name}</Link><button type="button" className="icon-button customer-close" aria-label="Close navigation" onClick={() => setOpen(false)}><FiX /></button></div><p className="customer-live-chip" aria-live="polite">{status}</p><nav><ul>{links.map(item => <li key={item.label}><Link href={item.full} className={path === item.full ? "is-active" : ""} onClick={() => setOpen(false)}><span>{item.icon}</span>{item.label}</Link></li>)}</ul></nav><Link href={`${base}/book`} className="button customer-book-button">Book now</Link></aside><main className="customer-main">{children}</main><nav className="customer-tabs" aria-label="Customer navigation">{links.slice(0, 3).concat(links[5]).map(item => <Link key={item.label} href={item.full} className={path === item.full ? "is-active" : ""}><span>{item.icon}</span>{item.label}</Link>)}</nav></div>;
+}
